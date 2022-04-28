@@ -1,6 +1,6 @@
 from cProfile import label
 from tkinter import *
-from grid import a
+from grid import a, noneditedBoarda, b, noneditedBoardb
 import time
 
 root = Tk()
@@ -12,18 +12,28 @@ root.title("Sudoku")
 canvas = Canvas(root, width=540, height=540, bg='white')
 canvas.pack(side=BOTTOM)
 
-variables = {}
+labels = []
+c = 0
 
-def printnum(row, col, num, color):
-    variables['sv'+str(row)+str(col)].set(num)
-
-def printBoard():
+def printBoard(arr):
+    array = []
     for i in range(9):
         for j in range(9):
-            if (a[i][j] != -1):
-                printnum(j, i, a[i][j], "black")                
-            else:
-                printnum(j, i, "", "black")
+            array.append(arr[i][j])
+
+    for x, l in zip(array, labels):
+        if x != -1:
+            l.config(text=str(x))
+        else:
+            l.config(text=' ')
+
+def resetfunc():
+    global c
+    c += 1
+    if (c % 2 == 0):
+        printBoard(noneditedBoarda)
+    else:
+        printBoard(noneditedBoardb)
 
 def is_valid(grid, row, col, num):
     for i in range(9):
@@ -56,7 +66,6 @@ def solvesudoku(grid, row, col):
     for i in range(1, 10):
         if is_valid(grid, row, col, i):
             grid[row][col] = i
-            printnum(row, col, "h", 'red')
 
             if solvesudoku(grid, row, col+1):
                 return True
@@ -65,19 +74,24 @@ def solvesudoku(grid, row, col):
     return False
 
 def solvedef():
-    if (solvesudoku(a, 0, 0)):
-        printBoard()
+    global c
+    bo = b
+    if c % 2 == 0:
+        bo = a
+
+    if (solvesudoku(bo, 0, 0)):
+        printBoard(bo)
 
 for i in range(9):
     for j in range(9):
-        variables['l'+str(i)+str(j)] = 'l'+str(i)+str(j)
-        variables['sv'+str(i)+str(j)] = StringVar()
-        variables['l'+str(i)+str(j)] = Label(canvas, textvariable=variables['sv'+str(i)+str(j)], bg="white", font=('arial', 16)).place(x=i*60+20, y=j*60+15)
+        l = Label(canvas, text=' ', font=('arial', 16), bg='white')
+        l.place(x=j*60+20, y=i*60+15)
+        labels.append(l)
 
-printBoard()
+printBoard(a)
 
 #graphics
-resetb = Button(root, text='RESET',  bg='white', command=printBoard)
+resetb = Button(root, text='RESET',  bg='white', command=resetfunc)
 resetb.place(x=20, y=10)
 
 solveb = Button(root, text='SOLVE',  bg='white', command=solvedef)
